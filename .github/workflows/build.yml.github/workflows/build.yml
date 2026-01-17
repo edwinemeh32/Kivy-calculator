@@ -1,0 +1,36 @@
+name: Build Kivy APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Install system dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y git python3 python3-pip python3-setuptools openjdk-17-jdk \
+          unzip zlib1g-dev libncurses5 libffi-dev libssl-dev wget
+
+      - name: Install Python packages
+        run: |
+          pip3 install --upgrade pip
+          pip3 install cython==0.29.36 buildozer kivy
+
+      - name: Build APK
+        run: |
+          buildozer android debug || exit 1
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: calculator-apk
+          path: bin/*.apk
