@@ -1,0 +1,40 @@
+name: Build Kivy APK
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      # Step 1: Checkout your code
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      # Step 2: Install system dependencies
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y python3-pip python3-setuptools python3-dev git openjdk-11-jdk unzip zlib1g-dev libncurses5 libffi-dev libssl-dev wget
+
+      # Step 3: Install Python packages
+      - name: Install Python packages
+        run: |
+          pip3 install --upgrade pip
+          pip3 install cython==0.29.36 buildozer kivy
+
+      # Step 4: Build APK
+      - name: Build APK
+        run: |
+          buildozer -v android debug || exit 1
+
+      # Step 5: Upload APK artifact
+      - name: Upload APK
+        uses: actions/upload-artifact@v3
+        with:
+          name: calculator-apk
+          path: bin/*.apk
